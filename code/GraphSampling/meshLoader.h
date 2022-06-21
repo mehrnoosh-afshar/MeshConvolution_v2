@@ -41,7 +41,8 @@ public:
     bool loadmesh_obj(const string &fileName) {
         //bool succeed = LoadOBJ(fileName, points, triangles);
         cout<<"Load mesh "<<fileName<<"\n";
-        bool succeed = LoadOBJ_withcolor(fileName, points, colors,triangles);
+        // bool succeed = LoadOBJ_withcolor(fileName, points, colors,triangles);
+        bool succeed = LoadOBJ(fileName, points,triangles);
         if (succeed == false) {
             cout << "Failed to load obj.\n";
             return 0;

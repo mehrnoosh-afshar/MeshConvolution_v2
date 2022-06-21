@@ -30,7 +30,7 @@ int main() {
     Mesh mesh;
 
     
-    mesh.loadmesh_obj("../../data/DFAUST/template.obj");
+    mesh.loadmesh_obj("../../data/Breast/template.obj");
     //mesh.loadmesh_obj("/mnt/hdd1/yi_hdd1/GraphCNN_Facebook/body/fall/data/D-FAUST/sample.obj");
     //mesh.loadmesh_obj("../../data/body_1m/template.obj");
 
@@ -43,24 +43,24 @@ int main() {
 
     cout<<"#############################################################\n";
     cout<<"## Save pool and unpool connection matrices in npy ##########\n";
-    string folder="../../train/0422_graphAE_dfaust/ConnectionMatrices/";
+    string folder="../../train/graphAE_Breast/ConnectionMatrices/";
     meshCNN.save_pool_and_unpool_neighbor_info_to_npz(folder);
 
 
     //Visualize the graph and receptive field of each down-sampling layer by vertex colors and dump in obj files.
     //Comment out the following code if you don't want to check the visualization.
-    cout<<"#############################################################\n";
-    cout<<"## Visualize the graphs and receptive fields in obj files. ##\n";
-    MeshPooler_Visualizer mpv;
+   // cout<<"#############################################################\n";
+   // cout<<"## Visualize the graphs and receptive fields in obj files. ##\n";
+   // MeshPooler_Visualizer mpv;
 
     
-    for (int i=0;i<meshCNN._meshPoolers.size();i++)
-    {
-        mpv.save_colored_obj_receptive_field(folder+"vis_receptive_"+to_string(i)+".obj", mesh,meshCNN,i);
+   // for (int i=0;i<meshCNN._meshPoolers.size();i++)
+   // {
+   //     mpv.save_colored_obj_receptive_field(folder+"vis_receptive_"+to_string(i)+".obj", mesh,meshCNN,i);
 
-        mpv.save_center_mesh(folder+"vis_center_"+to_string(i)+".obj", mesh,meshCNN, i);
-    } 
-    return 0;
+   //     mpv.save_center_mesh(folder+"vis_center_"+to_string(i)+".obj", mesh,meshCNN, i);
+   // } 
+   // return 0;
 
 
 

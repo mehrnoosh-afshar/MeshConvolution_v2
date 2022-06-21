@@ -4,14 +4,14 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/mnt/hdd1/yi_hdd1/GraphCNN_Facebook/public/code/GraphSampling/cnpy/cnpy.cpp" "/mnt/hdd1/yi_hdd1/GraphCNN_Facebook/public/code/GraphSampling/CMakeFiles/GraphSampling.dir/cnpy/cnpy.cpp.o"
-  "/mnt/hdd1/yi_hdd1/GraphCNN_Facebook/public/code/GraphSampling/main.cpp" "/mnt/hdd1/yi_hdd1/GraphCNN_Facebook/public/code/GraphSampling/CMakeFiles/GraphSampling.dir/main.cpp.o"
+  "/home/mehrnoosh/Documents/Mehrnoosh_git/MeshConvolution_v2/code/GraphSampling/cnpy/cnpy.cpp" "/home/mehrnoosh/Documents/Mehrnoosh_git/MeshConvolution_v2/code/GraphSampling/CMakeFiles/GraphSampling.dir/cnpy/cnpy.cpp.o"
+  "/home/mehrnoosh/Documents/Mehrnoosh_git/MeshConvolution_v2/code/GraphSampling/main.cpp" "/home/mehrnoosh/Documents/Mehrnoosh_git/MeshConvolution_v2/code/GraphSampling/CMakeFiles/GraphSampling.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "/usr/include/opencv"
+  "/usr/local/include/opencv4"
   )
 
 # Targets to which this target links.
