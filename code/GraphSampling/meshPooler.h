@@ -308,8 +308,9 @@ public:
         cout<<"Start setting connection map from mesh\n";
         _connection_map.clear();
         int point_num = mesh.points.size();
+        
         _connection_map.resize(point_num);
-
+  
         for (int i = 0; i < mesh.triangles.size(); i++) {
             Vec3<int> p = mesh.triangles[i];
             set_new_edge_to_connection_map(p[0], p[1], _connection_map);
@@ -520,17 +521,22 @@ private:
         int s;
         
         for(int i=0; i<_must_include_center_lst.size();i++)
-        {
+        { 
             s = _must_include_center_lst[i];
             cover_lst[s] = 1;
             queue.push_back(s);
         }
         
+     
         if(_must_include_center_lst.size()==0)
-        {
+        { 
             s=0;
             queue.push_back(s);
         }
+        
+        cout<< queue.size()<< "queue" << "\n";
+        // cout<<s<< !queue.empty() << "\n";
+        
         while (!queue.empty()) {
             // Dequeue a vertex from queue and print it
             s = queue.front();
@@ -539,13 +545,15 @@ private:
             vector<int> s_connection = _connection_map[s];
 
             for (int i = 0; i < s_connection.size(); i++) {
+
                 int p = s_connection[i];
                 if (cover_lst[p] >= 0) //visited
                     continue;
-
+                
                 if (can_be_center(p, radius, _connection_map, cover_lst)) {
                     cover_lst[p] = 1;
                 } else {
+                
                     cover_lst[p] = 0;
                 }
                 queue.push_back(p);
@@ -561,7 +569,7 @@ private:
             if (cover_lst[i] == 1)
                 sample_points_lst.push_back(i);
         }
-
+        
         return sample_points_lst;
 
     }

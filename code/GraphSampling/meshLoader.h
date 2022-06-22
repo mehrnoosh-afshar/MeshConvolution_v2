@@ -43,11 +43,13 @@ public:
         cout<<"Load mesh "<<fileName<<"\n";
         // bool succeed = LoadOBJ_withcolor(fileName, points, colors,triangles);
         bool succeed = LoadOBJ(fileName, points,triangles);
+        // cout << points.size() << "\n";
         if (succeed == false) {
             cout << "Failed to load obj.\n";
             return 0;
         }
-
+        
+        
     }
 
     bool LoadOFF(const string & fileName,

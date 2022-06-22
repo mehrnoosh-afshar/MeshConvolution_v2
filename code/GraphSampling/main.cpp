@@ -30,9 +30,13 @@ int main() {
     Mesh mesh;
 
     
-    mesh.loadmesh_obj("../../data/Breast/template.obj");
+    mesh.loadmesh_obj("../../data/Breast/Template.obj");
+    // mesh.loadmesh_obj("../../data/Breast/sample_tet.obj");
+
     //mesh.loadmesh_obj("/mnt/hdd1/yi_hdd1/GraphCNN_Facebook/body/fall/data/D-FAUST/sample.obj");
     //mesh.loadmesh_obj("../../data/body_1m/template.obj");
+
+    
 
     cout<<"#############################################################\n";
     cout<<"## Create pool and unpool layers ############################\n";
