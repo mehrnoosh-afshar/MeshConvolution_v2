@@ -7,7 +7,7 @@ This is a temporary script file.
 
 import torch
 import numpy as np
-import graphAE as graphAE
+import new_AE as graphAE
 import graphAE_param as Param
 import graphAE_dataloader as Dataloader
 from datetime import datetime
@@ -29,14 +29,20 @@ def train_one_iteration(param, model, optimizer,pc_lst, epoch, iteration):
     #print ("model forward time" , datetime.now()-start)
     
     #start=datetime.now()
-    loss_pose = torch.zeros(1).cuda()
-    loss_laplace = torch.zeros(1).cuda()
-    if(param.w_pose >0):
-        loss_pose = model.compute_geometric_loss_l1(in_pc_batch, out_pc_batch)
-    if(param.w_laplace >0):
-        loss_laplace = model.compute_laplace_loss_l1(in_pc_batch, out_pc_batch)
+    loss_pose = model.compute_geometric_loss_l1(in_pc_batch, out_pc_batch)
+    #loss_laplace_l1 = model.compute_laplace_loss_l1(in_pc_batch, out_pc_batch)
+    """
+    loss_w_weights, rate_zero_w_weights = model.compute_w_weight_loss()
+    rate_nonzero_w_weights=1-rate_zero_w_weights
     
-    loss = loss_pose*param.w_pose +  loss_laplace * param.w_laplace
+    w_w_weights=param.w_w_weights
+    if(param.method_positive_w_weights):
+        if(rate_nonzero_w_weights>0.5):
+            w_w_weights = (rate_nonzero_w_weights-0.5)/0.5*param.w_w_weights
+        else:
+            w_w_weights=0
+    """
+    loss = loss_pose*param.w_pose #+  loss_w_weights * w_w_weights
     loss.backward()
 
     #model.analyze_gradients()
@@ -47,19 +53,35 @@ def train_one_iteration(param, model, optimizer,pc_lst, epoch, iteration):
     total_iteration = epoch*param.iter_per_epoch + iteration
     if(iteration%100 == 0):
         print ("###Epoch", epoch, "Iteration", iteration, total_iteration)
-        if(param.w_pose>0):
-            print ("loss_pose:", loss_pose.item())
-        if(param.w_laplace>0):
-            print ("loss_laplace:", loss_laplace.item())
+        print ("loss_pose:", loss_pose.item())
+
+        
+        """
+        if(param.method_positive_w_weights == True):
+            print ("loss_w_weight_l1:", loss_w_weights.item())
+            print ("w_w_weight_l1:", w_w_weights)
+        else:
+            print ("loss_w_weight_l2:", loss_w_weights.item())
+            print ("w_w_weight_l2:", w_w_weights)
+        print ("rate_nonzero_w_weights:", rate_nonzero_w_weights)
+        """
         print ("loss:", loss.item())
         print ("lr:")
         for param_group in optimizer.param_groups:
             print(param_group['lr'])
         
     if(iteration%10 == 0): 
-        param.logger.add_scalars('Train_loss_without_weight', {'Loss_pose': loss_pose.item()},total_iteration)
-        param.logger.add_scalars('Train_loss_with_weight', {'Loss_pose': (loss_pose*param.w_pose).item()},total_iteration)
-        
+        param.logger.add_scalars('Train_without_weight', {'Loss_pose': loss_pose.item()},total_iteration)
+        """
+        if(param.method_positive_w_weights==True):
+            param.logger.add_scalars('Train_without_weight', {'loss_w_weights_l1': loss_w_weights.item()},total_iteration)
+            param.logger.add_scalars('Train_without_weight', {'rate_nonzero_w_weights:': rate_nonzero_w_weights},total_iteration)
+        else:
+            param.logger.add_scalars('Train_without_weight', {'loss_w_weights_l2': loss_w_weights.item()},total_iteration)
+        """
+        param.logger.add_scalars('Train_with_weight', {'Loss_pose': (loss_pose*param.w_pose).item()},total_iteration)
+        #param.logger.add_scalars('Train_with_weight', {'loss_w_weights': (loss_w_weights*w_w_weights).item()},total_iteration)
+
 def evaluate(param, model, pc_lst,epoch,template_plydata, suffix, log_eval=True):
     geo_error_sum = 0
     pc_num = len(pc_lst)
@@ -75,14 +97,17 @@ def evaluate(param, model, pc_lst,epoch,template_plydata, suffix, log_eval=True)
         if(batch<param.batch):
             pcs_torch = torch.cat((pcs_torch, torch.zeros(param.batch-batch, param.point_num, 3).cuda()),0)
         out_pcs_torch = model(pcs_torch)
-        geo_error_sum = geo_error_sum + model.compute_geometric_mean_euclidean_dist_error(pcs_torch, out_pcs_torch)*batch
+        geo_error = model.compute_geometric_mean_euclidean_dist_error(pcs_torch, out_pcs_torch)
+        geo_error_sum = geo_error_sum + geo_error*batch
+        #print(n, geo_error)
 
         if(n==0):   
             out_pc = np.array(out_pcs_torch[0].data.tolist()) 
             gt_pc = np.array(pcs_torch[0].data.tolist()) 
-            Dataloader.save_pc_into_ply(template_plydata, out_pc, param.write_tmp_folder+"epoch%04d"%epoch+"_out_"+suffix+".ply")
-            Dataloader.save_pc_into_ply(template_plydata, gt_pc, param.write_tmp_folder+"epoch%04d"%epoch+"_gt_"+suffix+".ply")
+            Dataloader.save_pc_into_ply(template_plydata, out_pc, param.write_tmp_folder+"epoch%04d"%epoch+suffix+".ply")
+            Dataloader.save_pc_into_ply(template_plydata, gt_pc, param.write_tmp_folder+suffix+".ply")
         n = n+batch
+        
 
     geo_error_avg=geo_error_sum.item()/pc_num
     if(log_eval==True):
@@ -164,12 +189,12 @@ def train(param):
     min_geo_error=123456
     for i in range(param.start_epoch, param.epoch+1):
 
-        if(((i%param.evaluate_epoch==0)and(i!=10)) or(i==param.epoch)):
+        if(((i%param.evaluate_epoch==0)and(i!=0)) or(i==param.epoch)):
             print ("###Evaluate", "epoch", i, "##########################")
             with torch.no_grad():
                 torch.manual_seed(0)
                 np.random.seed(0)
-                geo_error = evaluate(param, model, pc_lst_evaluate,i,template_plydata, suffix="_eval")    
+                geo_error = evaluate(param, model, pc_lst_evaluate,i,template_plydata, suffix="eval")    
                 if(geo_error<min_geo_error):
                     min_geo_error=geo_error
                     print ("###Save Weight")
@@ -188,7 +213,7 @@ def train(param):
         
 
 param=Param.Parameters()
-param.read_config("../../train/graphAE_Breast/30_conv_pool.config")
+param.read_config("../../train/GraphAE_Breast/00_conv_pool_Cheb_Mehr01.config")
 
 train(param)
 

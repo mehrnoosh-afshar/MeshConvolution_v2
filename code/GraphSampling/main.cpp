@@ -51,20 +51,20 @@ int main() {
     meshCNN.save_pool_and_unpool_neighbor_info_to_npz(folder);
 
 
-    //Visualize the graph and receptive field of each down-sampling layer by vertex colors and dump in obj files.
-    //Comment out the following code if you don't want to check the visualization.
-   // cout<<"#############################################################\n";
-   // cout<<"## Visualize the graphs and receptive fields in obj files. ##\n";
-   // MeshPooler_Visualizer mpv;
+   // Visualize the graph and receptive field of each down-sampling layer by vertex colors and dump in obj files.
+   // Comment out the following code if you don't want to check the visualization.
+    cout<<"#############################################################\n";
+    cout<<"## Visualize the graphs and receptive fields in obj files. ##\n";
+    MeshPooler_Visualizer mpv;
 
     
-   // for (int i=0;i<meshCNN._meshPoolers.size();i++)
-   // {
-   //     mpv.save_colored_obj_receptive_field(folder+"vis_receptive_"+to_string(i)+".obj", mesh,meshCNN,i);
+    for (int i=0;i<meshCNN._meshPoolers.size();i++)
+    {
+        mpv.save_colored_obj_receptive_field(folder+"vis_receptive_"+to_string(i)+".obj", mesh,meshCNN,i);
 
-   //     mpv.save_center_mesh(folder+"vis_center_"+to_string(i)+".obj", mesh,meshCNN, i);
-   // } 
-   // return 0;
+       mpv.save_center_mesh(folder+"vis_center_"+to_string(i)+".obj", mesh,meshCNN, i);
+    } 
+    return 0;
 
 
 
