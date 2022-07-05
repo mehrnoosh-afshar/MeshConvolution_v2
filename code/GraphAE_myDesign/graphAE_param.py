@@ -45,8 +45,9 @@ class Parameters():
         self.w_pose = float(config.get("Params", "w_pose"))
         self.w_laplace = float(config.get("Params", "w_laplace"))
         self.w_w_weights = float(config.get("Params","w_w_weights" ))
-        
-        self.conv_method = config.get("Params", "conv_method")
+
+        self.conv_method_list = json.loads(config.get("Params", "conv_method_list"))
+        # self.conv_method = config.get("Params", "conv_method")
         #Cheb
         #GAT
         #GMM

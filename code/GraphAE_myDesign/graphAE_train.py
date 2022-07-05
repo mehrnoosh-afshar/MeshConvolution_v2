@@ -213,10 +213,11 @@ def train(param):
         
 
 param=Param.Parameters()
-param.read_config("../../train/GraphAE_Breast/00_conv_pool_Cheb_Mehr01.config")
+param.read_config("/content/MeshConvolution_v2/train/graphAE_Breast/00_conv_pool_Cheb_Mehr01.config")
 
 train(param)
 
 
         
         
+

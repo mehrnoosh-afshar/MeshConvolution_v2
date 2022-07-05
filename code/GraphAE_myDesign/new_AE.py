@@ -40,8 +40,9 @@ class Model(nn.Module):
         
         self.use_vanilla_pool = param.use_vanilla_pool
         
-        self.conv_method = param.conv_method
-
+        # self.conv_method = param.conv_method
+        
+        self.conv_method_list = param.conv_method_list
         self.relu = nn.ELU()
 
         self.batch = param.batch
@@ -121,6 +122,8 @@ class Model(nn.Module):
         in_point_num = self.point_num
         in_channel = 3
         
+
+
         for l in range(self.layer_num):
             out_channel = self.channel_lst[l]
             weight_num = self.weight_num_lst[l]
@@ -151,6 +154,7 @@ class Model(nn.Module):
 
             ####parameters for conv###############
             conv_layer = ""
+            print("conv_method" , conv_method)
             if(residual_rate<1):
                 edge_index_lst = self.get_edge_index_lst_from_neighbor_id_lstlst(neighbor_id_lstlst, neighbor_num_lst)
                 print ("edge_index_lst", edge_index_lst.shape)
@@ -209,7 +213,7 @@ class Model(nn.Module):
                     
                     conv_layer = (weights, bias)
 
-                 elif(self.conv_method=="full"):
+                elif(conv_method=="full"):
 
                     weights = torch.randn(weight_num, out_channel*in_channel).cuda()
                 
@@ -550,11 +554,12 @@ class Model(nn.Module):
     def compute_param_num(self, ):
         total_param=0
         for i in range(self.layer_num):
-            in_channel, out_channel, in_pn, out_pn, weight_num,  max_neighbor_num, neighbor_num_lst,neighbor_id_lstlst, conv_layer, residual_layer, residual_rate, neighbor_mask_lst, zeros=self.layer_lst[i]
+
+            in_channel, out_channel, in_pn, out_pn, weight_num,  max_neighbor_num, neighbor_num_lst,neighbor_id_lstlst, conv_layer, residual_layer, residual_rate, neighbor_mask_lst, zeros, conv_method =self.layer_lst[i]
             
             if(len(conv_layer)!=0 ):
                 param_num=0
-                if(self.conv_method!="vw"):
+                if(conv_method!="vw"):
                     conv = conv_layer[-1]
                     for p in conv.parameters():
                         if p.requires_grad:
@@ -585,3 +590,4 @@ class Model(nn.Module):
             
         print ("Total network param num:", total_param)    
    
+
