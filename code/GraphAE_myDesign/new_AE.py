@@ -559,7 +559,7 @@ class Model(nn.Module):
             
             if(len(conv_layer)!=0 ):
                 param_num=0
-                if(conv_method!="vw"):
+                if((conv_method!="vw") & (conv_method!="full")):
                     conv = conv_layer[-1]
                     for p in conv.parameters():
                         if p.requires_grad:
@@ -567,6 +567,20 @@ class Model(nn.Module):
                             for i in range(len(p.shape)):
                                 p_dim = p_dim*p.shape[i]
                             param_num += p_dim
+                elif (conv_method =="full"):
+                    param_num=0
+                    (raw_weights, bias, raw_w_weights) = conv_layer
+
+                    w_weights =[]
+
+                    w_weights_num =  neighbor_mask_lst.sum()*weight_num
+                    w_weights_num = w_weights_num.item()
+                    
+                    param_num += w_weights_num 
+
+                    param_num +=np.array(list(raw_weights.shape)).sum()
+                    param_num +=np.array(list(bias.shape)).sum()
+                
                 else:
                     param_num = out_pn + neighbor_mask_lst.sum()*in_channel*out_channel
                 total_param+=param_num
