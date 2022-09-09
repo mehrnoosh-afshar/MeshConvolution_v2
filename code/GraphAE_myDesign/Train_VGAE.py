@@ -24,9 +24,9 @@ def train_one_iteration(param, model, optimizer, pc_lst, epoch, iteration):
 
     # start=datetime.now()
     # L1 Norm
-    # loss_pose = model.compute_geometric_loss_l1(in_pc_batch, out_pc_batch)
+    loss_pose = model.compute_geometric_loss_l1(in_pc_batch, out_pc_batch)
     # L2 Norm
-    loss_pose = model.compute_geometric_loss_l2_MSE(in_pc_batch, out_pc_batch)
+    #loss_pose = model.compute_geometric_loss_l2_MSE(in_pc_batch, out_pc_batch)
     # loss_laplace_l1 = model.compute_laplace_loss_l1(in_pc_batch, out_pc_batch)
 
     """
@@ -79,6 +79,36 @@ def train_one_iteration(param, model, optimizer, pc_lst, epoch, iteration):
         param.logger.add_scalars('Train_with_weight', {'Loss_pose': (loss_pose * param.w_pose).item()}, total_iteration)
         # param.logger.add_scalars('Train_with_weight', {'loss_w_weights': (loss_w_weights*w_w_weights).item()},total_iteration)
 
+def evaluate(param, model, pc_lst,epoch,template_plydata, suffix, log_eval=True):
+    geo_error_sum = 0
+    pc_num = len(pc_lst)
+    n = 0
+
+    while (n<(pc_num-1)):
+        batch = min(pc_num-n, param.batch)
+        pcs = pc_lst[n:n+batch]
+
+        pcs_torch = torch.FloatTensor(pcs).cuda()
+        if(param.augmented_data==True):
+            pcs_torch = Dataloader.get_augmented_pcs(pcs_torch)
+        if(batch<param.batch):
+            pcs_torch = torch.cat((pcs_torch, torch.zeros(param.batch-batch, param.point_num, 3).cuda()),0)
+        out_pcs_torch = model(pcs_torch)
+        geo_error_sum = geo_error_sum + model.compute_geometric_mean_euclidean_dist_error(pcs_torch, out_pcs_torch)*batch
+
+        if(n==0):   
+            out_pc = np.array(out_pcs_torch[0].data.tolist()) 
+            gt_pc = np.array(pcs_torch[0].data.tolist()) 
+            Dataloader.save_pc_into_ply(template_plydata, out_pc, param.write_tmp_folder+"epoch%04d"%epoch+"_out_"+suffix+".ply")
+            Dataloader.save_pc_into_ply(template_plydata, gt_pc, param.write_tmp_folder+"epoch%04d"%epoch+"_gt_"+suffix+".ply")
+        n = n+batch
+
+    geo_error_avg=geo_error_sum.item()/pc_num
+    if(log_eval==True):
+        param.logger.add_scalars('Evaluate', {'MSE Geo Error': geo_error_avg}, epoch)
+        print ("MSE Geo Error:", geo_error_avg)
+     
+    return geo_error_avg
 
 def train(param):
     torch.manual_seed(0)
@@ -88,6 +118,7 @@ def train(param):
     model = graphAE.GVAE(param)
     # Move to GPU
     model.cuda()
+    
 
     # Initialize the Optimizer
     optimizer = torch.optim.Adam(params=model.parameters(), lr=param.lr, weight_decay=param.weight_decay)
@@ -154,3 +185,31 @@ param=Param.Parameters()
 param.read_config("/content/MeshConvolution_v2/train/graphAE_Breast/00_conv_pool_Cheb_Mehr01.config")
 
 train(param)
+
+
+#model = graphAE.GVAE(param)
+
+##get ply file lst
+#pc_lst_train = np.load(param.pcs_train)
+#param.iter_per_epoch = int(len(pc_lst_train) / param.batch)
+#param.end_iter = param.iter_per_epoch * param.epoch
+    
+
+#np.random.shuffle(pc_lst_train)
+
+#pc_lst_train[:, :, 0:3] -= pc_lst_train[:, :, 0:3].mean(1).reshape((-1, 1, 3)).repeat(param.point_num, 1)
+
+
+#print("pc_lst_train",pc_lst_train.shape)
+
+
+
+#in_pc_batch = Dataloader.get_random_pc_batch_from_pc_lst_torch(pc_lst_train, param.neighbor_id_lstlst,
+#                                                                   param.neighbor_num_lst, param.batch,
+#                                                                   param.augmented_data)  # batch*3*point_num
+
+
+#print("pc_lst_train",in_pc_batch.shape)
+    # in_pc_batch =  in_pc_batch -pcs_mean_torch
+    # start=datetime.now()
+#out_pc_batch = model(in_pc_batch)

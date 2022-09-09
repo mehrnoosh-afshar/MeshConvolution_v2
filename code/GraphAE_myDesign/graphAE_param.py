@@ -40,6 +40,7 @@ class Parameters():
 
         self.weight_decay=float(config.get("Params", "weight_decay"))
         self.lr_decay = float(config.get("Params","lr_decay"))
+        self.latent_dim= int(config.get("Params","latent_dim"))
         self.lr_decay_epoch_step = float(config.get("Params","lr_decay_epoch_step"))
         
         self.w_pose = float(config.get("Params", "w_pose"))
@@ -93,6 +94,7 @@ class Parameters():
                 print ("!!!ERROR: cannot find the connection layer fn")
         
         self.channel_lst = json.loads(config.get("Params", "channel_lst"))
+        self.type_layer_lst = json.loads(config.get("Params", "type_layer_lst"))
         self.weight_num_lst = json.loads(config.get("Params", "weight_num_lst"))
 
 
